@@ -1,25 +1,48 @@
+function getTimeNow() {
+  const now = new Date();
+  let h = now.getHours();
+  let m = now.getMinutes();
+  if (h < 10) h = "0" + h;
+  if (m < 10) m = "0" + m;
+  return `${h}:${m}`;
+}
+
 function generateImage() {
   const message = document.getElementById("message").value.trim();
-  const resultDiv = document.getElementById("result");
+  if (message === "") return alert("Isi dulu pesannya ya!");
 
-  if (!message) {
-    alert("Harap masukkan teks terlebih dahulu!");
-    return;
-  }
+  const time = getTimeNow();
+  const url = `https://brat.siputzx.my.id/iphone-quoted?time=${time}&messageText=${encodeURIComponent(message)}&carrierName=INDOSAT%20OOREDOO`;
 
-  resultDiv.innerHTML = '<div class="loader"></div><p>Sedang memproses...</p>';
-
-  const apiUrl = `https://brat.siputzx.my.id/iphone-quoted?time=11%3A26&messageText=${encodeURIComponent(message)}&carrierName=INDOSAT%20OOREDOO&batteryPercentage=88&signalStrength=4&emojiStyle=apple`;
-
-  setTimeout(() => {
-    resultDiv.innerHTML = `
-      <p>Hasil:</p>
-      <p style="margin:10px 0; font-size:1.1rem; color:#fff; background:#222; padding:10px; border-radius:8px;">
-        ${message}
-      </p>
-      <img src="${apiUrl}" alt="Generated Image">
-      <br>
-      <a class="download-btn" href="/api/download?url=${encodeURIComponent(apiUrl)}">⬇️ Download</a>
-    `;
-  }, 800);
+  // Tampilkan gambar dulu
+  document.getElementById("result").innerHTML = `
+    <img id="previewImg" src="${url}" style="width:100%;border-radius:18px;margin-top:15px;">
+    <button id="downloadBtn" onclick="downloadImage('${url}')" style="margin-top:10px;padding:10px 15px;border:none;border-radius:10px;background:#1d9bf0;color:white;cursor:pointer;animation:pulse 1.5s infinite;">
+      ⬇️ Download
+    </button>
+  `;
 }
+
+async function downloadImage(imgUrl) {
+  try {
+    const response = await fetch(imgUrl);
+    const blob = await response.blob();
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "iphone-quoted.png";
+    link.click();
+  } catch (err) {
+    alert("Gagal download, coba ulang.");
+  }
+}
+
+/* Animasi tombol */
+const style = document.createElement("style");
+style.innerHTML = `
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+`;
+document.head.appendChild(style);
